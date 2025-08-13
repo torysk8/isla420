@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
 import Footer from "@/components/footer";
 
 <meta name="robots" content="noindex, nofollow" data-whatsapp-url="true" />
@@ -9,7 +8,7 @@ import Footer from "@/components/footer";
 export const metadata: Metadata = {
   title: {
     default: 'Shop | Calzado y ropa Premium en Colombia',
-    template: '%s | Ritzi Sneakers'
+    template: '%s | Isla 420'
   },
   description: 'Encuentra los sneakers más exclusivos y cómodos. viste premium para hombre y mujer con envíos a todo Colombia.',
   keywords: ['sneakers', 'zapatillas premium', 'calzado deportivo', 'moda urbana', 'Colombia'],
@@ -65,7 +64,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header/>
+        
         {children}
         <Footer/>
       </body>

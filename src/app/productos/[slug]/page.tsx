@@ -1,8 +1,12 @@
+"use client";
+
 import { getProductBySlug } from '@/app/actions/product/get-product.action';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getAjustedPrice } from '@/utils/price'; // Asegúrate de que la ruta sea correcta
 import { formatPrice } from "@/utils/miles";
+import { useEffect, useState } from 'react';
+import { Product } from '@/app/types';
 
 
 // Prop types para Next.js 15
@@ -10,33 +14,50 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata(props: Props) {
-  const params = await props.params;
-  const slug = params.slug;
-  const product = await getProductBySlug(slug);
+export default function ProductPage(props: Props) {
+  const [slug, setSlug] = useState<string>('');
+  const [product, setProduct] = useState<Product | null>(null);
+  const [userPhone, setUserPhone] = useState<string>('3022484816'); // número por defecto
+  const [loading, setLoading] = useState(true);
 
-  if (!product || 'message' in product) {
-    return {
-      title: 'Producto no encontrado',
-      description: 'No se pudo encontrar el producto solicitado',
+  useEffect(() => {
+    const initPage = async () => {
+      try {
+        // Obtener el slug
+        const params = await props.params;
+        setSlug(params.slug);
+
+        // Obtener el producto
+        const productData = await getProductBySlug(params.slug);
+        setProduct(productData);
+
+        // Obtener el número de teléfono del usuario
+        const res = await fetch(`https://vendetiyo.vercel.app/api/user?email=${process.env.NEXT_PUBLIC_userEmail}`);
+        const data = await res.json();
+        if (data.user?.phone) {
+          setUserPhone(data.user.phone);
+        }
+      } catch (error) {
+        console.error('Error loading page data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    initPage();
+  }, [props.params]);
+
+  // Mostrar loading mientras se carga
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando producto...</p>
+        </div>
+      </div>
+    );
   }
-
-  return {
-    title: `${product.name} | Tienda Online`,
-    description: product.short_description || product.description || 'Detalles del producto',
-  };
-}
-
-export default async function ProductPage(props: Props) {
-  const params = await props.params;
-  const slug = params.slug;
-  // DEBUG: Log slug recibido
-  console.log('[ProductPage] slug recibido:', slug);
-  const product = await getProductBySlug(slug);
-  // DEBUG: Log producto recibido
-  console.log('[ProductPage] producto recibido:', product);
-
   // Si hay error o no se encontró el producto
   if (!product || 'message' in product) {
     return (
@@ -48,7 +69,7 @@ export default async function ProductPage(props: Props) {
             Lo sentimos, el producto que buscas no existe o ya no está disponible.
           </p>
           <a
-            href={`https://wa.me/3022484816?text=${encodeURIComponent(`Hola, busco el producto: ${slug.replace(/-/g, " ")} ¿Tienen disponibilidad?`)}`}
+            href={`https://wa.me/${userPhone}?text=${encodeURIComponent(`Hola, busco el producto: ${slug.replace(/-/g, " ")} ¿Tienen disponibilidad?`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block w-full mb-3 px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
@@ -202,7 +223,7 @@ export default async function ProductPage(props: Props) {
 
             {/* WhatsApp Button */}
             <Link
-              href={`https://wa.me/3022484816?text=${encodeURIComponent(`Hola! Me interesa el producto: ${product.name} - $${product.price || product.regular_price}`)}`}
+              href={`https://wa.me/${userPhone}?text=${encodeURIComponent(`Hola! Me interesa el producto: ${product.name} - $${product.price || product.regular_price}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-4 px-4 rounded-lg font-medium transition-all active:scale-95 flex items-center justify-center gap-3 text-base sm:text-lg touch-manipulation"

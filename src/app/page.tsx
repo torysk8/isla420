@@ -2,7 +2,7 @@ import HeroCarousel from "@/components/HeroCarousel";
 import { Product } from "@/app/types";
 import api from "@/lib/woocommerce";
 import { Metadata } from "next";
-import TextCarousel from "@/components/ProductCarousel";
+import VansCarousel from "@/components/CatCarousel";
 
 export const metadata: Metadata = {
   title: 'Inicio | Shop - Viste Premium en Colombia',
@@ -51,7 +51,7 @@ export default async function Home() {
       <HeroCarousel />
       
       {/* Sección de categorias */}
-      <TextCarousel />
+      <VansCarousel />
       
       {/* Mensaje temporal si no hay productos */}
       {featuredProducts.length === 0 && (
